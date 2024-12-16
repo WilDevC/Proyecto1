@@ -37,6 +37,18 @@ public:
         this ->distanceNandLip = distanceNandLip;        
     };
 
+    void printCityzen(){
+        cout << getName() << endl;
+        cout << getRace() << endl;
+        cout << getHeigth() << endl;
+        cout << getMagicalAbility() << endl;
+        cout << getEyeDepth() << endl;
+        cout << getDistanceBE() << endl;
+        cout << getDistanceFToN() << endl;
+        cout << getDistanceNandLip() << endl;
+    }
+
+
     void setName(string name){
         this ->name = name;
     }
@@ -92,43 +104,9 @@ public:
 
 
 
-class city : protected citizen
-{
-private:
-    citizen citizen[N_MAX];
-public:
-    city(): citizen(){};
-
-    void printCitizens(){
-        for (int i = 1; i <= citizensN; i++){
-            cout << citizen[i].getName() << endl;
-            cout << citizen[i].getRace() << endl;
-            cout << citizen[i].getHeigth() << endl;
-            cout << citizen[i].getMagicalAbility() << endl;
-            cout << citizen[i].getEyeDepth() << endl;
-            cout << citizen[i].getDistanceBE() << endl;
-            cout << citizen[i].getDistanceFToN() << endl;
-            cout << citizen[i].getDistanceNandLip() << endl;
-        }
-    }
-    void printCityzen(int n){
-
-        cout << citizen[n].getName() << endl;
-        cout << citizen[n].getRace() << endl;
-        cout << citizen[n].getHeigth() << endl;
-        cout << citizen[n].getMagicalAbility() << endl;
-        cout << citizen[n].getEyeDepth() << endl;
-        cout << citizen[n].getDistanceBE() << endl;
-        cout << citizen[n].getDistanceFToN() << endl;
-        cout << citizen[n].getDistanceNandLip() << endl;
-
-    }
-};
 
 
-
-
-void readBD(city city){
+void readBD(citizen citizens[]){
     ifstream dataBase ("dataBase.in");
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
@@ -149,7 +127,7 @@ void readBD(city city){
 
 
     for (int i = 1; i <= citizensN; i++){
-        getline(dataBase,line); citizen[i].setName(line);
+        getline(dataBase,line); citizens[i].setName(line);
 
         dataBase >> race; citizens[i].setRace(race);
         dataBase >> heigth; citizens[i].setHeigth(heigth);
@@ -167,13 +145,14 @@ void readBD(city city){
 
 
 int main (){
-    city city;
+    citizen citizens[N_MAX];
 
-    readBD(city);
+    readBD(citizens);
+
+
+
     cout << "Ciudadanos Activos." << endl;
     cout << citizensN << endl;
-
-
 
 
 
