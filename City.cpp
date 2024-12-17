@@ -9,7 +9,6 @@ using namespace std;
 int citizensN = 0;
 
 
-
 class citizen
 {
 protected:
