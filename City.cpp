@@ -6,7 +6,7 @@ using namespace std;
 
 
 
-int citizensN = 0;
+int citizensN, N = 0;
 
 
 class citizen
@@ -35,7 +35,8 @@ public:
         this ->distanceFtoN = distanceFtoN;
         this ->distanceNandLip = distanceNandLip;        
     };
-
+    
+    //Setters
     void setName(string name){
         this ->name = name;
     }
@@ -60,7 +61,7 @@ public:
     void setDistanceNandLip(float distanceNandLip){
         this ->distanceNandLip = distanceNandLip; 
     }
-
+    //Getters
     string getName(){
         return name;
     }
@@ -85,7 +86,6 @@ public:
     float getDistanceNandLip(){
         return distanceNandLip; 
     }
-
 
 };
 
@@ -122,16 +122,60 @@ public:
         cout << citizens[n].getDistanceNandLip() << endl;
 
     }
+    bool addCitizen(string name, string race, float heigth, string magicalAbility, float eyeDepth,
+                    float dsitanceBE, float distanceFToN, float distanceNandLip, int num){
+                        bool flag=true;
+
+                        if (race != "Humano" && race != "Humana" && race != "Kripsen" && race != "Elfo" && 
+                            race != "Enano" && race != "Goliat" && race != "Orco" && 
+                            race != "Ubarikiwe" && race != "Hada" && race != "Celcoa" && race != "Drakna'ar"){
+                                flag = false;
+                            }
+                        if (heigth < 1 || heigth > 20){                    
+                            flag = false;
+                        }
+                        if (eyeDepth <0.1 || eyeDepth > 0.5){
+                            flag = false;
+                        }
+                        if (dsitanceBE <0.1 || dsitanceBE >0.5){ 
+                            flag = false;
+                        }
+                        if (distanceFToN < 1 || distanceFToN > 4){ 
+                            flag = false;
+                        }
+                        if (distanceNandLip < 0.1 || distanceNandLip > 0.5){  
+                            flag = false;
+                        }
+
+                        if (flag){
+                            citizens[num].setName(name);
+                            citizens[num].setRace(race);
+                            citizens[num].setHeigth(heigth);
+                            citizens[num].setMagicalAbility(magicalAbility);                            
+                            citizens[num].setEyeDepth(eyeDepth);
+                            citizens[num].setDistanceBE(dsitanceBE);
+                            citizens[num].setDistanceFToN(distanceFToN);
+                            citizens[num].setDistanceNandLip(distanceNandLip);
+                            return flag;                            
+                        }else {
+                            return flag;
+                        }   
+                    }
+
+
+
+
 
     void readBD(){
-    ifstream dataBase ("dataBase.in");
+
+    ifstream dataBase ("dataBase1.in");
+
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
         return;
     }
 
-
-    dataBase >> citizensN;
+    dataBase >> N;
     dataBase.ignore();
 
     if (citizensN < 1 || citizensN > 1000){
@@ -139,23 +183,27 @@ public:
         return;
     }
 
-
     string name, race, magicalAbility, line;
     float heigth, eyeDepth, distanceBE, distanceFtoN, distanceNandLip;
 
+    for (int i = 1, num = 1; i <= N; i++){
+        getline(dataBase,line);
 
-    for (int i = 1; i <= citizensN; i++){
-        getline(dataBase,line); citizens[i].setName(line);
-
-        dataBase >> race; citizens[i].setRace(race);
-        dataBase >> heigth; citizens[i].setHeigth(heigth);
-        dataBase >> magicalAbility; citizens[i].setMagicalAbility(magicalAbility);
-        dataBase >> eyeDepth; citizens[i].setEyeDepth(eyeDepth);
-        dataBase >> distanceBE; citizens[i].setDistanceBE(distanceBE);
-        dataBase >> distanceFtoN; citizens[i].setDistanceFToN(distanceFtoN);
-        dataBase >> distanceNandLip; citizens[i].setDistanceNandLip(distanceNandLip);   
+        dataBase >> race;
+        dataBase >> heigth;
+        dataBase >> magicalAbility;
+        dataBase >> eyeDepth;
+        dataBase >> distanceBE;
+        dataBase >> distanceFtoN;
+        dataBase >> distanceNandLip; 
         dataBase.ignore();
+
+        if (addCitizen(line,race,heigth,magicalAbility,eyeDepth,distanceBE,distanceFtoN,distanceNandLip,num)){
+            num++;
+            citizensN++;
+        }
     }
+    //Revisar Si hay 1 sujeto con numeros falsos como lo maneja el programa...
     
     dataBase.close();
     }
@@ -169,8 +217,9 @@ int main (){
     city.readBD();
     cout << "Ciudadanos Activos." << endl;
     cout << citizensN << endl;
-    city.printCitizens();
 
+
+    city.printCitizens();
 
 
 
