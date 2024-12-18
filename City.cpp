@@ -6,7 +6,7 @@ using namespace std;
 
 
 
-int citizensN, N = 0;
+int citizensN=0 , N = 0;
 
 
 class citizen
@@ -35,6 +35,21 @@ public:
         this ->distanceFtoN = distanceFtoN;
         this ->distanceNandLip = distanceNandLip;        
     };
+
+    void printCityzen(){
+
+        cout << name << endl;
+        cout << race << endl;
+        cout << heigth << endl;
+        cout << magicalAbility << endl;
+        cout << eyeDepth << endl;
+        cout << distanceBE << endl;
+        cout << distanceFtoN << endl;
+        cout << distanceNandLip << endl;
+    }
+
+
+
     
     //Setters
     void setName(string name){
@@ -95,8 +110,33 @@ class city : protected citizen
 {
 private:
     citizen citizens[N_MAX];
+    citizen supiciusList[N_MAX];
+    citizen aux[3];
+    int suspiciusNum = 1;
 public:
     city(): citizens(){};
+
+
+
+    bool compareArcaneTrail(citizen sujetoA, citizen sujetoB){
+
+    }
+
+
+    void matchArcaneTrail(int li, int depth){
+        if (depth == 3){
+            for (int i = 0; i < 3; i++){
+                aux[i].printCityzen();
+            }
+            cout << endl;
+            return;
+        }
+
+        for (int i = li; i <= citizensN; i++){
+            aux[depth] = citizens[i]; 
+            matchArcaneTrail(i+1,depth+1);
+        }
+    }
 
     void printCitizens(){
         for (int i = 1; i <= citizensN; i++){
@@ -161,11 +201,6 @@ public:
                             return flag;
                         }   
                     }
-
-
-
-
-
     void readBD(){
 
     ifstream dataBase ("dataBase1.in");
@@ -178,7 +213,7 @@ public:
     dataBase >> N;
     dataBase.ignore();
 
-    if (citizensN < 1 || citizensN > 1000){
+    if (N < 1 || N > 1000){
         cout << "Valor introducido Erroneo." << endl;
         return;
     }
@@ -215,11 +250,11 @@ int main (){
     city city;
 
     city.readBD();
+
     cout << "Ciudadanos Activos." << endl;
-    cout << citizensN << endl;
 
 
-    city.printCitizens();
+    city.matchArcaneTrail(1,0);
 
 
 
