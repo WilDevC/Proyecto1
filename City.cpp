@@ -6,7 +6,7 @@ using namespace std;
 
 
 
-int citizensN=0 , N = 0;
+int N=0, citizensN=0; 
 
 
 class citizen
@@ -48,7 +48,9 @@ public:
         cout << distanceNandLip << endl;
     }
 
-
+    bool isMagical(){
+        return (magicalAbility == "Si");
+    }
 
     
     //Setters
@@ -112,30 +114,102 @@ private:
     citizen citizens[N_MAX];
     citizen supiciusList[N_MAX];
     citizen aux[3];
-    int suspiciusNum = 1;
+    int suspiciusNum=0;
 public:
     city(): citizens(){};
 
 
+    //Calcula el margen de error de cualquier digito ingresado.
 
-    bool compareArcaneTrail(citizen sujetoA, citizen sujetoB){
+    bool CME(float valor, float medida){
+        float margin = 0.05;
+        if (valor >= (medida-margin) && valor <= (medida+margin)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    //Verifica si un sospechoso ya se encuentra en la lista de sospechosos.
+
+    bool isInSuspiciusList(citizen Suspicius){
+        for (int i = 0; i < suspiciusNum; i++){
+            if(supiciusList[i].getName() == Suspicius.getName()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+    //Compara las 3 personas ingresadas en el arreglo auxiliar si coiciden con 3 caracteristicas o mas
+
+    bool compareArcaneTrail(){
+        int match =0;
+        if (CME(aux[0].getEyeDepth(), aux[1].getEyeDepth()) && CME(aux[1].getEyeDepth(),aux[2].getEyeDepth())){
+            match++;
+        }
+        if (CME(aux[0].getDistanceBE(), aux[1].getDistanceBE()) && CME(aux[1].getDistanceBE(),aux[2].getDistanceBE())){
+            match++;
+        }
+        if (CME(aux[0].getDistanceFToN(), aux[1].getDistanceFToN()) && CME(aux[1].getDistanceFToN(),aux[2].getDistanceFToN())){
+            match++;
+        }
+        if (CME(aux[0].getDistanceNandLip(), aux[1].getDistanceNandLip()) && CME(aux[1].getDistanceNandLip(),aux[2].getDistanceNandLip())){
+            match++;
+        }
+        if (match >= 3){
+            return true;
+        }else{
+            return false;
+        }       
 
     }
 
 
+    //Recurividad para sacar las diferentes combinaciones entre 3 personas.
+
     void matchArcaneTrail(int li, int depth){
         if (depth == 3){
-            for (int i = 0; i < 3; i++){
-                aux[i].printCityzen();
-            }
-            cout << endl;
+            cout << "A:" << aux[0].getName() << " B " << aux[1].getName() << " C " << aux[2].getName() << endl;
+
+            if (compareArcaneTrail()){
+                if (!isInSuspiciusList(aux[0])){
+                    supiciusList[suspiciusNum++] = aux[0];
+                }
+                if (!isInSuspiciusList(aux[1])){
+                    supiciusList[suspiciusNum++] = aux[1];
+                }
+                if (!isInSuspiciusList(aux[2])){
+                    supiciusList[suspiciusNum++] = aux[2];
+                }                
+            };
             return;
         }
 
         for (int i = li; i <= citizensN; i++){
-            aux[depth] = citizens[i]; 
-            matchArcaneTrail(i+1,depth+1);
+
+            if(!citizens[i].isMagical()){
+                aux[depth] = citizens[i]; 
+                matchArcaneTrail(i+1,depth+1);
+            }
         }
+    }
+
+
+    void printSuspicius(){
+        for (int i = 0; i < suspiciusNum; i++){
+            cout << suspiciusNum << endl;
+            cout << supiciusList[i].getName() << endl;
+            cout << supiciusList[i].getRace() << endl;
+            cout << supiciusList[i].getHeigth() << endl;
+            cout << supiciusList[i].getMagicalAbility() << endl;
+            cout << supiciusList[i].getEyeDepth() << endl;
+            cout << supiciusList[i].getDistanceBE() << endl;
+            cout << supiciusList[i].getDistanceFToN() << endl;
+            cout << supiciusList[i].getDistanceNandLip() << endl;
+        } 
     }
 
     void printCitizens(){
@@ -162,6 +236,9 @@ public:
         cout << citizens[n].getDistanceNandLip() << endl;
 
     }
+
+    //Añade un ciudadano a la lista asegurandose que cumpla con los valores adecuados.
+
     bool addCitizen(string name, string race, float heigth, string magicalAbility, float eyeDepth,
                     float dsitanceBE, float distanceFToN, float distanceNandLip, int num){
                         bool flag=true;
@@ -188,14 +265,14 @@ public:
                         }
 
                         if (flag){
-                            citizens[num].setName(name);
-                            citizens[num].setRace(race);
-                            citizens[num].setHeigth(heigth);
-                            citizens[num].setMagicalAbility(magicalAbility);                            
-                            citizens[num].setEyeDepth(eyeDepth);
-                            citizens[num].setDistanceBE(dsitanceBE);
-                            citizens[num].setDistanceFToN(distanceFToN);
-                            citizens[num].setDistanceNandLip(distanceNandLip);
+                                citizens[num].setName(name);
+                                citizens[num].setRace(race);
+                                citizens[num].setHeigth(heigth);
+                                citizens[num].setMagicalAbility(magicalAbility);                            
+                                citizens[num].setEyeDepth(eyeDepth);
+                                citizens[num].setDistanceBE(dsitanceBE);
+                                citizens[num].setDistanceFToN(distanceFToN);
+                                citizens[num].setDistanceNandLip(distanceNandLip);
                             return flag;                            
                         }else {
                             return flag;
@@ -253,10 +330,9 @@ int main (){
 
     cout << "Ciudadanos Activos." << endl;
 
-
     city.matchArcaneTrail(1,0);
 
-
+    city.printSuspicius();
 
 
     return 0;
