@@ -51,6 +51,9 @@ public:
     bool isMagical(){
         return (magicalAbility == "Si");
     }
+    bool isKripsan(){
+        return (race == "Kripsan");
+    }
 
     
     //Setters
@@ -164,7 +167,6 @@ public:
         }else{
             return false;
         }       
-
     }
 
 
@@ -190,7 +192,7 @@ public:
 
         for (int i = li; i <= citizensN; i++){
 
-            if(!citizens[i].isMagical()){
+            if(!citizens[i].isMagical() && !citizens[i].isKripsan()){
                 aux[depth] = citizens[i]; 
                 matchArcaneTrail(i+1,depth+1);
             }
