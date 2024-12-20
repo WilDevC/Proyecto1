@@ -118,10 +118,14 @@ private:
     citizen supiciusList[N_MAX];
     citizen aux[3];
     int suspiciusNum=0;
+    bool suspiciusStatus[N_MAX]={false};
+    int SkinWalkerNum=0;
+    string SkinWalkers[N_MAX];
+
 public:
     city(): citizens(){};
 
-
+    //SECCION DE MARGEN ERROR
     //Calcula el margen de error de cualquier digito ingresado.
 
     bool CME(float valor, float medida){
@@ -132,7 +136,32 @@ public:
             return false;
         }
     }
+    
+    //SECCION DE VERIFICACION DE ALTURAS DE LOS SOSPECHOSO
+    // Verificamos si la altura de la siguiente forma aumenta o disminuye 1 unidad de medida o no.
 
+    bool HeightAnalysis (float interval, float height) {
+        if (height >= (interval-1.0) && height <= (interval+1.0)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //SECCION DE VERIFICACION DE CAMBIOS DE ESTRUCTURA FACIAL DE LOS SOSPECHOSOS
+    // Verificamos si el sospechoso que le pasamos con el siguiente comparten una estructura facial en comun que no cambia
+
+    bool FaceAnalysis (citizen Suspicius1, citizen Suspicius2) {
+        if(Suspicius1.getEyeDepth()     == Suspicius2.getEyeDepth()         ||
+        Suspicius1.getDistanceBE()      == Suspicius2.getDistanceBE()       ||
+        Suspicius1.getDistanceNandLip() == Suspicius2.getDistanceNandLip()  ||
+        Suspicius1.getDistanceFToN()    == Suspicius2.getDistanceFToN()) {
+            return true;
+        }
+        return false;
+    }
+
+    //SECCION DE VERIFICAR LA LISTA DE SOSPECHOSOS
     //Verifica si un sospechoso ya se encuentra en la lista de sospechosos.
 
     bool isInSuspiciusList(citizen Suspicius){
@@ -144,8 +173,63 @@ public:
         return false;
     }
 
+    bool IsRevised(int index) {
+        return(suspiciusStatus[index]);
+    }
+    // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
+    void SkinWalkersDectector(int Count, int aux, int Skins, int k = 0) {
+        
+        if (Count == suspiciusNum && SkinWalkerNum != 0) {
+            // PARA EFECTO DE LAS PRUEBAS
+            for (int i = k; i <= Skins; i++) {
+                cout << SkinWalkers[i] << endl;
+                cout << "hola" << endl;
+            }
+            
+            k = SkinWalkerNum + Skins;
+            
+            cout << SkinWalkerNum << endl;
+            cout << Skins << endl;
+            cout <<"soy aux "<< aux;
+            return;
+        }
+
+        for (int i = 0; i < suspiciusNum; i++) {
+              
+            if (!IsRevised(i)) {
+                cout << "entre" << endl;
+                if (HeightAnalysis(supiciusList[i].getHeigth(),supiciusList[Count].getHeigth()) &&
+                FaceAnalysis(supiciusList[i], supiciusList[Count])) {
+                    
+                    if (aux == 0) {
+                        SkinWalkers[SkinWalkerNum++] = supiciusList[i].getName();
+                        SkinWalkers[Skins++ + 1] = supiciusList[Count].getName();
+                        suspiciusStatus[i] = true;
+                        suspiciusStatus[Count] = true;
+                        aux = 1;
+
+                    } else {
+                        SkinWalkers[Skins++ + 1] = supiciusList[Count].getName();
+                        suspiciusStatus[Count] = true;
+                    }
+                    
+                    SkinWalkersDectector(Count + 1, aux, Skins);
+                    aux = 0;
+                
+                } else {
+                    
+                    SkinWalkersDectector(Count + 1, aux, Skins);
+                    aux = 0;
+                }
+
+            }
+        
+        } 
+
+    }
 
 
+    //SECCION DE SELECCION DEL GRUPO DE SOSPECHOSOS
     //Compara las 3 personas ingresadas en el arreglo auxiliar si coiciden con 3 caracteristicas o mas
 
     bool compareArcaneTrail(){
@@ -171,7 +255,7 @@ public:
 
 
     //Recurividad para sacar las diferentes combinaciones entre 3 personas.
-
+    //SECCION DE LA BUSQUEDA DE LOS GRUPOS A ESTUDIAR
     void matchArcaneTrail(int li, int depth){
         if (depth == 3){
             cout << "A:" << aux[0].getName() << " B " << aux[1].getName() << " C " << aux[2].getName() << endl;
@@ -201,8 +285,8 @@ public:
 
 
     void printSuspicius(){
+        cout << "Sospechosos " << suspiciusNum << endl;
         for (int i = 0; i < suspiciusNum; i++){
-            cout << suspiciusNum << endl;
             cout << supiciusList[i].getName() << endl;
             cout << supiciusList[i].getRace() << endl;
             cout << supiciusList[i].getHeigth() << endl;
@@ -335,6 +419,9 @@ int main (){
     city.matchArcaneTrail(1,0);
 
     city.printSuspicius();
+
+    city.SkinWalkersDectector(1, 0, 0);
+
 
 
     return 0;
