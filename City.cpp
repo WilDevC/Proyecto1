@@ -116,11 +116,12 @@ class city : protected citizen
 private:
     citizen citizens[N_MAX];
     citizen supiciusList[N_MAX];
+    citizen SkinWalkers[N_MAX];
     citizen aux[3];
     int suspiciusNum=0;
     bool suspiciusStatus[N_MAX]={false};
     int SkinWalkerNum=0;
-    string SkinWalkers[N_MAX];
+    char skinWalkerListed[N_MAX];
 
 public:
     city(): citizens(){};
@@ -172,54 +173,70 @@ public:
         }
         return false;
     }
-
-    bool IsRevised(int index) {
-        return(suspiciusStatus[index]);
+    
+    void swap(citizen &A, citizen &B) {
+        citizen auxA = A;
+        A = B;
+        B = auxA;
+        return;
     }
-    // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
-    void SkinWalkersDectector(int Count, int aux, int Skins, int k = 0) {
-        
-        if (Count == suspiciusNum && SkinWalkerNum != 0) {
-            // PARA EFECTO DE LAS PRUEBAS
-            for (int i = k; i <= Skins; i++) {
-                cout << SkinWalkers[i] << endl;
-                cout << "hola" << endl;
+
+    void bubblesort(citizen A[], int n) {
+        for (int i = 0; i < n - 1; i++) {
+            bool swaped = false;
+            for (int j = 0; j < n - 1 - i; j++) {
+                if (A[j].getEyeDepth() > A[j + 1].getEyeDepth()) {
+                    swap (A[j], A[j + 1]);
+                    swaped = true;
+                }
             }
-            
-            k = SkinWalkerNum + Skins;
-            
-            cout << SkinWalkerNum << endl;
-            cout << Skins << endl;
-            cout <<"soy aux "<< aux;
+            if (!swaped) return;
+        }
+    }
+
+
+    // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
+    void SkinWalkersDectector(int Count, int aux, int Skins) {
+        
+        if (Count == suspiciusNum) {
+            SkinWalkerNum++;
+            suspiciusStatus[Skins - 1] = true;
+            bubblesort(SkinWalkers, Skins);
+            printSkinwalkers(Skins);
             return;
         }
 
         for (int i = 0; i < suspiciusNum; i++) {
               
-            if (!IsRevised(i)) {
-                cout << "entre" << endl;
+            if (!suspiciusStatus[i]) {
+                
                 if (HeightAnalysis(supiciusList[i].getHeigth(),supiciusList[Count].getHeigth()) &&
                 FaceAnalysis(supiciusList[i], supiciusList[Count])) {
                     
                     if (aux == 0) {
-                        SkinWalkers[SkinWalkerNum++] = supiciusList[i].getName();
-                        SkinWalkers[Skins++ + 1] = supiciusList[Count].getName();
+                        SkinWalkers[Skins++] = supiciusList[i];
+                        SkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
-                        suspiciusStatus[Count] = true;
                         aux = 1;
 
                     } else {
-                        SkinWalkers[Skins++ + 1] = supiciusList[Count].getName();
-                        suspiciusStatus[Count] = true;
+                        SkinWalkers[Skins++] = supiciusList[Count];
+                        suspiciusStatus[i] = true;
                     }
                     
                     SkinWalkersDectector(Count + 1, aux, Skins);
+                    Count = Skins + 1;
                     aux = 0;
+                    Skins = 0;
+
                 
                 } else {
                     
                     SkinWalkersDectector(Count + 1, aux, Skins);
+                    Count = Skins + 1;
                     aux = 0;
+                    Skins = 0;
+
                 }
 
             }
@@ -227,7 +244,6 @@ public:
         } 
 
     }
-
 
     //SECCION DE SELECCION DEL GRUPO DE SOSPECHOSOS
     //Compara las 3 personas ingresadas en el arreglo auxiliar si coiciden con 3 caracteristicas o mas
@@ -298,6 +314,17 @@ public:
         } 
     }
 
+    void printSkinwalkers(int n) {
+        cout << SkinWalkerNum << endl;
+        for (int i = 0; i < n; i++) {
+            if (i == 0) {
+                cout << SkinWalkerNum << " - " << SkinWalkers[i].getName() << " (O) " << endl;
+            } else {
+                cout << SkinWalkerNum << " - " << SkinWalkers[i].getName() << endl;
+            }
+        }
+    }
+
     void printCitizens(){
         for (int i = 1; i <= citizensN; i++){
             cout << citizens[i].getName() << endl;
@@ -366,7 +393,7 @@ public:
                     }
     void readBD(){
 
-    ifstream dataBase ("dataBase1.in");
+    ifstream dataBase ("dataBase2.in");
 
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
