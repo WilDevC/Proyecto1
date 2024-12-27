@@ -116,12 +116,20 @@ class city : protected citizen
 private:
     citizen citizens[N_MAX];
     citizen supiciusList[N_MAX];
+    citizen AuxSkinWalkers[N_MAX];
     citizen aux[3];
-    int suspiciusNum=0;
+    string ListedSkinWalkers[N_MAX];
+    int suspiciusNum=0;;
+    int SkinWalkerNum=0;
+    int SkinWalkerListed[N_MAX];
+    int li=0; //Auxiliar para armar el arreglo
+    int auxSkins=0;
+    bool suspiciusStatus[N_MAX]={false};
+
 public:
     city(): citizens(){};
 
-
+    //SECCION DE MARGEN ERROR
     //Calcula el margen de error de cualquier digito ingresado.
 
     bool CME(float valor, float medida){
@@ -132,7 +140,32 @@ public:
             return false;
         }
     }
+    
+    //SECCION DE VERIFICACION DE ALTURAS DE LOS SOSPECHOSO
+    // Verificamos si la altura de la siguiente forma aumenta o disminuye 1 unidad de medida o no.
 
+    bool HeightAnalysis (float interval, float height) {
+        if (height >= (interval-1.0) && height <= (interval+1.0)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //SECCION DE VERIFICACION DE CAMBIOS DE ESTRUCTURA FACIAL DE LOS SOSPECHOSOS
+    // Verificamos si el sospechoso que le pasamos con el siguiente comparten una estructura facial en comun que no cambia
+
+    bool FaceAnalysis (citizen Suspicius1, citizen Suspicius2) {
+        if(Suspicius1.getEyeDepth()     == Suspicius2.getEyeDepth()         ||
+        Suspicius1.getDistanceBE()      == Suspicius2.getDistanceBE()       ||
+        Suspicius1.getDistanceNandLip() == Suspicius2.getDistanceNandLip()  ||
+        Suspicius1.getDistanceFToN()    == Suspicius2.getDistanceFToN()) {
+            return true;
+        }
+        return false;
+    }
+
+    //SECCION DE VERIFICAR LA LISTA DE SOSPECHOSOS
     //Verifica si un sospechoso ya se encuentra en la lista de sospechosos.
 
     bool isInSuspiciusList(citizen Suspicius){
@@ -143,9 +176,100 @@ public:
         }
         return false;
     }
+    
+    void swap(citizen &A, citizen &B) {
+        citizen auxA = A;
+        A = B;
+        B = auxA;
+        return;
+    }
+
+    void bubblesort(citizen A[], int n) {
+        for (int i = 0; i < n - 1; i++) {
+            bool swaped = false;
+            for (int j = 0; j < n - 1 - i; j++) {
+                if (A[j].getEyeDepth() > A[j + 1].getEyeDepth()) {
+                    swap (A[j], A[j + 1]);
+                    swaped = true;
+                }
+            }
+            if (!swaped) return;
+        }
+
+    }
+
+    void ListedSkinwalkers(citizen AuxSkinWalkers[], int Skins) {
+
+        for (int i = li, k = 0, aux = 0; i < auxSkins; i++, k++, aux = 1) {
+            if (aux == 0) {
+                ListedSkinWalkers[i] = AuxSkinWalkers[k].getName() + " (O) ";
+            } else {
+                ListedSkinWalkers[i] = AuxSkinWalkers[k].getName();
+            }
+        }
+
+        for (int i = li; i < auxSkins; i++) {
+            SkinWalkerListed[i] = SkinWalkerNum;
+        }
+        
+        li += Skins;
+        return;
+        
+    }
 
 
+    // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
+    void SkinWalkersDectector(int Count, int aux, int Skins) {
+        
+        if (Count == suspiciusNum) {
+            SkinWalkerNum++;
+            auxSkins += Skins;
+            suspiciusStatus[Skins - 1] = true;
+            bubblesort(AuxSkinWalkers, Skins);
+            ListedSkinwalkers(AuxSkinWalkers, Skins);
+            return;
+        }
 
+        for (int i = 0; i < suspiciusNum; i++) {
+              
+            if (!suspiciusStatus[i]) {
+                
+                if (HeightAnalysis(supiciusList[i].getHeigth(),supiciusList[Count].getHeigth()) &&
+                FaceAnalysis(supiciusList[i], supiciusList[Count])) {
+                    
+                    if (aux == 0) {
+                        AuxSkinWalkers[Skins++] = supiciusList[i];
+                        AuxSkinWalkers[Skins++] = supiciusList[Count];
+                        suspiciusStatus[i] = true;
+                        aux = 1;
+
+                    } else {
+                        AuxSkinWalkers[Skins++] = supiciusList[Count];
+                        suspiciusStatus[i] = true;
+                    }
+                    
+                    SkinWalkersDectector(Count + 1, aux, Skins);
+                    Count = Skins + 1;
+                    aux = 0;
+                    Skins = 0;
+
+                
+                } else {
+                    
+                    SkinWalkersDectector(Count + 1, aux, Skins);
+                    Count = Skins + 1;
+                    aux = 0;
+                    Skins = 0;
+
+                }
+
+            }
+        
+        } 
+
+    }
+
+    //SECCION DE SELECCION DEL GRUPO DE SOSPECHOSOS
     //Compara las 3 personas ingresadas en el arreglo auxiliar si coiciden con 3 caracteristicas o mas
 
     bool compareArcaneTrail(){
@@ -171,7 +295,7 @@ public:
 
 
     //Recurividad para sacar las diferentes combinaciones entre 3 personas.
-
+    //SECCION DE LA BUSQUEDA DE LOS GRUPOS A ESTUDIAR
     void matchArcaneTrail(int li, int depth){
         if (depth == 3){
             cout << "A:" << aux[0].getName() << " B " << aux[1].getName() << " C " << aux[2].getName() << endl;
@@ -201,8 +325,8 @@ public:
 
 
     void printSuspicius(){
+        cout << "Sospechosos " << suspiciusNum << endl;
         for (int i = 0; i < suspiciusNum; i++){
-            cout << suspiciusNum << endl;
             cout << supiciusList[i].getName() << endl;
             cout << supiciusList[i].getRace() << endl;
             cout << supiciusList[i].getHeigth() << endl;
@@ -212,6 +336,13 @@ public:
             cout << supiciusList[i].getDistanceFToN() << endl;
             cout << supiciusList[i].getDistanceNandLip() << endl;
         } 
+    }
+
+    void printSkinWalkers() {
+        cout << SkinWalkerNum << endl;
+        for (int i = 0; i < li; i++) {
+            cout << SkinWalkerListed[i] << " - " << ListedSkinWalkers[i] << endl;
+        }
     }
 
     void printCitizens(){
@@ -282,7 +413,7 @@ public:
                     }
     void readBD(){
 
-    ifstream dataBase ("dataBase1.in");
+    ifstream dataBase ("dataBase2.in");
 
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
@@ -336,6 +467,9 @@ int main (){
 
     city.printSuspicius();
 
+    city.SkinWalkersDectector(1, 0, 0);
+
+    city.printSkinWalkers();
 
     return 0;
 
