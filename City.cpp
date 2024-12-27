@@ -116,12 +116,15 @@ class city : protected citizen
 private:
     citizen citizens[N_MAX];
     citizen supiciusList[N_MAX];
-    citizen SkinWalkers[N_MAX];
+    citizen AuxSkinWalkers[N_MAX];
     citizen aux[3];
-    int suspiciusNum=0;
-    bool suspiciusStatus[N_MAX]={false};
+    string ListedSkinWalkers[N_MAX];
+    int suspiciusNum=0;;
     int SkinWalkerNum=0;
-    char skinWalkerListed[N_MAX];
+    int SkinWalkerListed[N_MAX];
+    int li=0; //Auxiliar para armar el arreglo
+    int auxSkins=0;
+    bool suspiciusStatus[N_MAX]={false};
 
 public:
     city(): citizens(){};
@@ -192,6 +195,26 @@ public:
             }
             if (!swaped) return;
         }
+
+    }
+
+    void ListedSkinwalkers(citizen AuxSkinWalkers[], int Skins) {
+
+        for (int i = li, k = 0, aux = 0; i < auxSkins; i++, k++, aux = 1) {
+            if (aux == 0) {
+                ListedSkinWalkers[i] = AuxSkinWalkers[k].getName() + " (O) ";
+            } else {
+                ListedSkinWalkers[i] = AuxSkinWalkers[k].getName();
+            }
+        }
+
+        for (int i = li; i < auxSkins; i++) {
+            SkinWalkerListed[i] = SkinWalkerNum;
+        }
+        
+        li += Skins;
+        return;
+        
     }
 
 
@@ -200,9 +223,10 @@ public:
         
         if (Count == suspiciusNum) {
             SkinWalkerNum++;
+            auxSkins += Skins;
             suspiciusStatus[Skins - 1] = true;
-            bubblesort(SkinWalkers, Skins);
-            printSkinwalkers(Skins);
+            bubblesort(AuxSkinWalkers, Skins);
+            ListedSkinwalkers(AuxSkinWalkers, Skins);
             return;
         }
 
@@ -214,13 +238,13 @@ public:
                 FaceAnalysis(supiciusList[i], supiciusList[Count])) {
                     
                     if (aux == 0) {
-                        SkinWalkers[Skins++] = supiciusList[i];
-                        SkinWalkers[Skins++] = supiciusList[Count];
+                        AuxSkinWalkers[Skins++] = supiciusList[i];
+                        AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
                         aux = 1;
 
                     } else {
-                        SkinWalkers[Skins++] = supiciusList[Count];
+                        AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
                     }
                     
@@ -314,14 +338,10 @@ public:
         } 
     }
 
-    void printSkinwalkers(int n) {
+    void printSkinWalkers() {
         cout << SkinWalkerNum << endl;
-        for (int i = 0; i < n; i++) {
-            if (i == 0) {
-                cout << SkinWalkerNum << " - " << SkinWalkers[i].getName() << " (O) " << endl;
-            } else {
-                cout << SkinWalkerNum << " - " << SkinWalkers[i].getName() << endl;
-            }
+        for (int i = 0; i < li; i++) {
+            cout << SkinWalkerListed[i] << " - " << ListedSkinWalkers[i] << endl;
         }
     }
 
@@ -449,7 +469,7 @@ int main (){
 
     city.SkinWalkersDectector(1, 0, 0);
 
-
+    city.printSkinWalkers();
 
     return 0;
 
