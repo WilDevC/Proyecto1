@@ -127,9 +127,8 @@ private:
     int auxSkins=0;
     int suspiciusCount[N_MAX];
     int suspiciusCountnum=0;
-    int suspiciusCountli=0;
-    int suspiciusCountliaux=0;
     bool suspiciusStatus[N_MAX]={false};
+    int lastsuspicius=0;
 
 public:
     city(): citizens(){};
@@ -221,27 +220,56 @@ public:
 
     // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
     void SkinWalkersDectector(int Count, int aux, int Skins, bool flag) {
-        
-        if (Count == suspiciusNum && aux == 1) {
+
+        if (Count == suspiciusNum && Skins > 0) {
             SkinWalkerNum++;
             auxSkins += Skins;
-            suspiciusStatus[Skins - 1] = true;
-            OriginalForm=0;
-            if (suspiciusCountli > 0) {
-                for (int i = suspiciusCountli; i <= suspiciusCountnum; i++) {
-                    suspiciusStatus[i] = false;
+            suspiciusStatus[lastsuspicius] = true;
+            if (suspiciusCountnum > 0) {
+                for (int i = 0; i < suspiciusCountnum; i++) {
+                    int index = suspiciusCount[i];
+                    suspiciusStatus[index] = false;
                     suspiciusCount[i] = 0;
                 }
                 suspiciusCountnum = 0;
-                suspiciusCountli = 0;
-                suspiciusCountliaux = 1;
+                flag = false;
             }
+            OriginalForm=0;
             ListedSkinwalkers(AuxSkinWalkers, Skins);
+            return;
+        } 
+
+        if (Count == suspiciusNum && Skins == 0) {
+             if (suspiciusCountnum > 0) {
+                for (int i = 0; i < suspiciusCountnum; i++) {
+                    int index = suspiciusCount[i];
+                    suspiciusStatus[index] = false;
+                    suspiciusCount[i] = 0;
+                }
+                suspiciusCountnum = 0;
+                flag = false;
+            }      
+            for (int i = 0; i < suspiciusNum; i++) {
+                if (suspiciusStatus[i] == false) {
+                    suspiciusStatus[i] = true;
+                    break;
+                } 
+            }
+            OriginalForm=0;
             return;
         }
 
+
         for (int i = 0; i < suspiciusNum; i++) {
-              
+
+            if (Count < i) {
+                return;
+            }
+
+            if (suspiciusStatus[Count]) {
+                Count++;
+            }
+
             if (!suspiciusStatus[i] && Count > i) {
                 
                 if (aux == 0) {
@@ -257,21 +285,25 @@ public:
                         AuxSkinWalkers[Skins++] = supiciusList[i];
                         AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
+                        lastsuspicius = Count;
                         OriginalForm=i;
                         aux = 1;
 
                     } else {
                         AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
+                        lastsuspicius = Count;
                     }
-                    SkinWalkersDectector(Count + 1, aux, Skins, true);
-                    if (suspiciusCountliaux == 0) {
-                        Count = Skins + 1;
-                    } else {
-                        Count = suspiciusCountliaux + 1;
-                    }
-                    if (suspiciusStatus[Count]) {
-                        Count++;
+                    SkinWalkersDectector(Count + 1, aux, Skins, flag);
+                    int aux2 = 0;
+                    for (int i = 0; i < suspiciusNum; i++) {
+                        if (suspiciusStatus[i] == false) {
+                            aux2++;
+                            if (aux2 == 2) {
+                                Count = i;
+                                break;
+                            }
+                        }
                     }
                     aux = 0;
                     Skins = 0;
@@ -280,23 +312,22 @@ public:
                 } else {
                     
                     if (flag == false) {
-                        suspiciusCountli = Count;
-                        suspiciusCountnum++;
-                        suspiciusCount[suspiciusCountnum] = Count;
+                        suspiciusCount[suspiciusCountnum++] = Count;
                         suspiciusStatus[Count] = true;
                     } else {
-                        suspiciusCountnum++;
-                        suspiciusCount[suspiciusCountnum] = Count;
+                        suspiciusCount[suspiciusCountnum++] = Count;
                         suspiciusStatus[Count] = true;
                     }
-                    SkinWalkersDectector(Count + 1, aux, Skins, false);
-                    if (suspiciusCountliaux == 0) {
-                        Count = Skins + 1;
-                    } else {
-                        Count = suspiciusCountliaux + 1;
-                    }
-                    if (suspiciusStatus[Count]) {
-                        Count++;
+                    SkinWalkersDectector(Count + 1, aux, Skins, true);
+                    int aux2 = 0;
+                    for (int i = 0; i < suspiciusNum; i++) {
+                        if (suspiciusStatus[i] == false) {
+                            aux2++;
+                            if (aux2 == 2) {
+                                Count = i;
+                                break;
+                            }
+                        }
                     }
                     aux = 0;
                     Skins = 0;
@@ -453,7 +484,7 @@ public:
                     }
     void readBD(){
 
-    ifstream dataBase ("dataBase3.in");
+    ifstream dataBase ("dataBase4.in");
 
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
@@ -502,6 +533,8 @@ int main (){
     city.readBD();
 
     cout << "Ciudadanos Activos." << endl;
+
+    city.printCitizens();
 
     city.matchArcaneTrail(1,0);
 
