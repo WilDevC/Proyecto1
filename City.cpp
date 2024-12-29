@@ -122,8 +122,13 @@ private:
     int suspiciusNum=0;;
     int SkinWalkerNum=0;
     int SkinWalkerListed[N_MAX];
+    int OriginalForm=0;
     int li=0; //Auxiliar para armar el arreglo
     int auxSkins=0;
+    int suspiciusCount[N_MAX];
+    int suspiciusCountnum=0;
+    int suspiciusCountli=0;
+    int suspiciusCountliaux=0;
     bool suspiciusStatus[N_MAX]={false};
 
 public:
@@ -133,33 +138,25 @@ public:
     //Calcula el margen de error de cualquier digito ingresado.
 
     bool CME(float valor, float medida){
-        float margin = 0.05;
-        if (valor >= (medida-margin) && valor <= (medida+margin)){
-            return true;
-        }else{
-            return false;
-        }
+        return (valor >= (medida-0.05) && valor <= (medida+0.05));
     }
     
     //SECCION DE VERIFICACION DE ALTURAS DE LOS SOSPECHOSO
     // Verificamos si la altura de la siguiente forma aumenta o disminuye 1 unidad de medida o no.
 
     bool HeightAnalysis (float interval, float height) {
-        if (height >= (interval-1.0) && height <= (interval+1.0)) {
-            return true;
-        } else {
-            return false;
-        }
+        return (height >= (interval-1.05) && height <= (interval+1.05));
     }
 
     //SECCION DE VERIFICACION DE CAMBIOS DE ESTRUCTURA FACIAL DE LOS SOSPECHOSOS
     // Verificamos si el sospechoso que le pasamos con el siguiente comparten una estructura facial en comun que no cambia
 
     bool FaceAnalysis (citizen Suspicius1, citizen Suspicius2) {
-        if(Suspicius1.getEyeDepth()     == Suspicius2.getEyeDepth()         ||
-        Suspicius1.getDistanceBE()      == Suspicius2.getDistanceBE()       ||
-        Suspicius1.getDistanceNandLip() == Suspicius2.getDistanceNandLip()  ||
-        Suspicius1.getDistanceFToN()    == Suspicius2.getDistanceFToN()) {
+        if(CME(Suspicius1.getEyeDepth(), Suspicius2.getEyeDepth())                ||
+           CME(Suspicius1.getDistanceBE(), Suspicius2.getDistanceBE() )           ||
+           CME(Suspicius1.getDistanceNandLip(), Suspicius2.getDistanceNandLip())  ||
+           CME(Suspicius1.getDistanceFToN(), Suspicius2.getDistanceFToN())
+           ) {
             return true;
         }
         return false;
@@ -183,13 +180,13 @@ public:
         B = auxA;
         return;
     }
-
-    void bubblesort(citizen A[], int n) {
-        for (int i = 0; i < n - 1; i++) {
+    
+    void bubblesort() {
+        for (int i = 0; i < suspiciusNum - 1; i++) {
             bool swaped = false;
-            for (int j = 0; j < n - 1 - i; j++) {
-                if (A[j].getEyeDepth() > A[j + 1].getEyeDepth()) {
-                    swap (A[j], A[j + 1]);
+            for (int j = 0; j < suspiciusNum - 1 - i; j++) {
+                if (supiciusList[j].getEyeDepth() > supiciusList[j + 1].getEyeDepth()) {
+                    swap (supiciusList[j], supiciusList[j + 1]);
                     swaped = true;
                 }
             }
@@ -197,7 +194,7 @@ public:
         }
 
     }
-
+    
     void ListedSkinwalkers(citizen AuxSkinWalkers[], int Skins) {
 
         for (int i = li, k = 0, aux = 0; i < auxSkins; i++, k++, aux = 1) {
@@ -216,48 +213,91 @@ public:
         return;
         
     }
-
+    
+    bool checkProfundity(float suspicius1, float suspicius2) {
+        return (suspicius2 > suspicius1);
+    }
+    
 
     // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
-    void SkinWalkersDectector(int Count, int aux, int Skins) {
+    void SkinWalkersDectector(int Count, int aux, int Skins, bool flag) {
         
-        if (Count == suspiciusNum) {
+        if (Count == suspiciusNum && aux == 1) {
             SkinWalkerNum++;
             auxSkins += Skins;
             suspiciusStatus[Skins - 1] = true;
-            bubblesort(AuxSkinWalkers, Skins);
+            OriginalForm=0;
+            if (suspiciusCountli > 0) {
+                for (int i = suspiciusCountli; i <= suspiciusCountnum; i++) {
+                    suspiciusStatus[i] = false;
+                    suspiciusCount[i] = 0;
+                }
+                suspiciusCountnum = 0;
+                suspiciusCountli = 0;
+                suspiciusCountliaux = 1;
+            }
             ListedSkinwalkers(AuxSkinWalkers, Skins);
             return;
         }
 
         for (int i = 0; i < suspiciusNum; i++) {
               
-            if (!suspiciusStatus[i]) {
+            if (!suspiciusStatus[i] && Count > i) {
                 
-                if (HeightAnalysis(supiciusList[i].getHeigth(),supiciusList[Count].getHeigth()) &&
-                FaceAnalysis(supiciusList[i], supiciusList[Count])) {
+                if (aux == 0) {
+                   OriginalForm=i;
+                }
+
+                if (HeightAnalysis(supiciusList[OriginalForm].getHeigth(),supiciusList[Count].getHeigth()) &&
+                    FaceAnalysis(supiciusList[i], supiciusList[Count])                          && 
+                    checkProfundity(supiciusList[i].getEyeDepth(), supiciusList[Count].getEyeDepth())
+                    ) {
                     
                     if (aux == 0) {
                         AuxSkinWalkers[Skins++] = supiciusList[i];
                         AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
+                        OriginalForm=i;
                         aux = 1;
 
                     } else {
                         AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
                     }
-                    
-                    SkinWalkersDectector(Count + 1, aux, Skins);
-                    Count = Skins + 1;
+                    SkinWalkersDectector(Count + 1, aux, Skins, true);
+                    if (suspiciusCountliaux == 0) {
+                        Count = Skins + 1;
+                    } else {
+                        Count = suspiciusCountliaux + 1;
+                    }
+                    if (suspiciusStatus[Count]) {
+                        Count++;
+                    }
                     aux = 0;
                     Skins = 0;
 
                 
                 } else {
                     
-                    SkinWalkersDectector(Count + 1, aux, Skins);
-                    Count = Skins + 1;
+                    if (flag == false) {
+                        suspiciusCountli = Count;
+                        suspiciusCountnum++;
+                        suspiciusCount[suspiciusCountnum] = Count;
+                        suspiciusStatus[Count] = true;
+                    } else {
+                        suspiciusCountnum++;
+                        suspiciusCount[suspiciusCountnum] = Count;
+                        suspiciusStatus[Count] = true;
+                    }
+                    SkinWalkersDectector(Count + 1, aux, Skins, false);
+                    if (suspiciusCountliaux == 0) {
+                        Count = Skins + 1;
+                    } else {
+                        Count = suspiciusCountliaux + 1;
+                    }
+                    if (suspiciusStatus[Count]) {
+                        Count++;
+                    }
                     aux = 0;
                     Skins = 0;
 
@@ -413,7 +453,7 @@ public:
                     }
     void readBD(){
 
-    ifstream dataBase ("dataBase2.in");
+    ifstream dataBase ("dataBase3.in");
 
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
@@ -465,9 +505,11 @@ int main (){
 
     city.matchArcaneTrail(1,0);
 
+    city.bubblesort();
+
     city.printSuspicius();
 
-    city.SkinWalkersDectector(1, 0, 0);
+    city.SkinWalkersDectector(1, 0, 0, false);
 
     city.printSkinWalkers();
 
