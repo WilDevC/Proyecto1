@@ -220,11 +220,12 @@ public:
 
     // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
     void SkinWalkersDectector(int Count, int aux, int Skins, bool flag) {
-
+        //Se dedica a guardar la solucion en caso de haber encontrado un CambiaForma
         if (Count == suspiciusNum && Skins > 0) {
-            SkinWalkerNum++;
-            auxSkins += Skins;
-            suspiciusStatus[lastsuspicius] = true;
+            SkinWalkerNum++; //Al encontrar uno aumenta el numero de CambiaFormas
+            auxSkins += Skins; //Actualiza una variable para la funcion de guardar a los cambiaformas
+            suspiciusStatus[lastsuspicius] = true; //Coloca el ultimo sospechoso confirmado como forma como revisado
+            // En este if desmarca las casillas de los sospechoso que reviso pero que no marco como que son cambiaformas
             if (suspiciusCountnum > 0) {
                 for (int i = 0; i < suspiciusCountnum; i++) {
                     int index = suspiciusCount[i];
@@ -234,11 +235,13 @@ public:
                 suspiciusCountnum = 0;
                 flag = false;
             }
-            OriginalForm=0;
-            ListedSkinwalkers(AuxSkinWalkers, Skins);
+            OriginalForm=0; //Reseteamos el originalForm para posteriormente comparar nuevas alturas
+            ListedSkinwalkers(AuxSkinWalkers, Skins); //Guardamos el cambia formas
             return;
         } 
 
+        //Se dedica a entrar en el caso de no encontrar ningun cambia formas con ese indice y desmarca los 
+        //que se revisaron y el indice que no pudo ser usado
         if (Count == suspiciusNum && Skins == 0) {
              if (suspiciusCountnum > 0) {
                 for (int i = 0; i < suspiciusCountnum; i++) {
@@ -261,12 +264,12 @@ public:
 
 
         for (int i = 0; i < suspiciusNum; i++) {
-
+            //Nos aseguramos que el i nunca sea mayor que el Count
             if (Count < i) {
                 return;
             }
-
-            if (suspiciusStatus[Count]) {
+            //Nos aseguramos que no se salga de los limites y que no este usado nuestro Count
+            if (suspiciusStatus[Count] && Count < (suspiciusNum - 1)) {
                 Count++;
             }
 
@@ -295,12 +298,14 @@ public:
                         lastsuspicius = Count;
                     }
                     SkinWalkersDectector(Count + 1, aux, Skins, flag);
+                    //El for se encarga de encontrar el nuevo count, el cual siempre sera el segundo
+                    //false en el arreglo del estatus de sospechosos
                     int aux2 = 0;
-                    for (int i = 0; i < suspiciusNum; i++) {
-                        if (suspiciusStatus[i] == false) {
+                    for (int j = 0; j < suspiciusNum; j++) {
+                        if (suspiciusStatus[j] == false) {
                             aux2++;
                             if (aux2 == 2) {
-                                Count = i;
+                                Count = j;
                                 break;
                             }
                         }
@@ -310,7 +315,8 @@ public:
 
                 
                 } else {
-                    
+                    //Lo que hacemos aqui es que en el caso de no encontrar una forma con ese indice
+                    //lo marcamos como usado para no repetirlo en las demas iteraciones como un indice valido
                     if (flag == false) {
                         suspiciusCount[suspiciusCountnum++] = Count;
                         suspiciusStatus[Count] = true;
@@ -319,12 +325,14 @@ public:
                         suspiciusStatus[Count] = true;
                     }
                     SkinWalkersDectector(Count + 1, aux, Skins, true);
+                    //El for se encarga de encontrar el nuevo count, el cual siempre sera el segundo
+                    //false en el arreglo del estatus de sospechosos
                     int aux2 = 0;
-                    for (int i = 0; i < suspiciusNum; i++) {
-                        if (suspiciusStatus[i] == false) {
+                    for (int j = 0; j < suspiciusNum; j++) {
+                        if (suspiciusStatus[j] == false) {
                             aux2++;
                             if (aux2 == 2) {
-                                Count = i;
+                                Count = j;
                                 break;
                             }
                         }
@@ -484,7 +492,7 @@ public:
                     }
     void readBD(){
 
-    ifstream dataBase ("dataBase4.in");
+    ifstream dataBase ("dataBase2.in");
 
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
