@@ -273,7 +273,7 @@ public:
                 Count++;
             }
 
-            if (!suspiciusStatus[i] && Count > i) {
+            if (!suspiciusStatus[i] && Count > i && !suspiciusStatus[Count]) {
                 
                 if (aux == 0) {
                    OriginalForm=i;
@@ -342,6 +342,19 @@ public:
 
                 }
 
+            }
+
+            if (i == (suspiciusNum-1) && Count == (suspiciusNum-1) && suspiciusStatus[Count]) {
+                int kaux=0;
+                for (int k = 0; k < suspiciusNum; k++) {
+                    if (suspiciusStatus[k] == false) {
+                        kaux++; 
+                    }
+                    }
+                if (kaux == 1) {
+                    SkinWalkersDectector(Count + 1, aux, Skins, flag);
+                    return;
+                }
             }
         
         } 
@@ -492,7 +505,7 @@ public:
                     }
     void readBD(){
 
-    ifstream dataBase ("dataBase2.in");
+    ifstream dataBase ("dataBase10.in");
 
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
