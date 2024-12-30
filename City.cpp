@@ -122,9 +122,13 @@ private:
     int suspiciusNum=0;;
     int SkinWalkerNum=0;
     int SkinWalkerListed[N_MAX];
+    int OriginalForm=0;
     int li=0; //Auxiliar para armar el arreglo
     int auxSkins=0;
+    int suspiciusCount[N_MAX];
+    int suspiciusCountnum=0;
     bool suspiciusStatus[N_MAX]={false};
+    int lastsuspicius=0;
 
 public:
     city(): citizens(){};
@@ -133,33 +137,25 @@ public:
     //Calcula el margen de error de cualquier digito ingresado.
 
     bool CME(float valor, float medida){
-        float margin = 0.05;
-        if (valor >= (medida-margin) && valor <= (medida+margin)){
-            return true;
-        }else{
-            return false;
-        }
+        return (valor >= (medida-0.05) && valor <= (medida+0.05));
     }
     
     //SECCION DE VERIFICACION DE ALTURAS DE LOS SOSPECHOSO
     // Verificamos si la altura de la siguiente forma aumenta o disminuye 1 unidad de medida o no.
 
     bool HeightAnalysis (float interval, float height) {
-        if (height >= (interval-1.0) && height <= (interval+1.0)) {
-            return true;
-        } else {
-            return false;
-        }
+        return (height >= (interval-1.05) && height <= (interval+1.05));
     }
 
     //SECCION DE VERIFICACION DE CAMBIOS DE ESTRUCTURA FACIAL DE LOS SOSPECHOSOS
     // Verificamos si el sospechoso que le pasamos con el siguiente comparten una estructura facial en comun que no cambia
 
     bool FaceAnalysis (citizen Suspicius1, citizen Suspicius2) {
-        if(Suspicius1.getEyeDepth()     == Suspicius2.getEyeDepth()         ||
-        Suspicius1.getDistanceBE()      == Suspicius2.getDistanceBE()       ||
-        Suspicius1.getDistanceNandLip() == Suspicius2.getDistanceNandLip()  ||
-        Suspicius1.getDistanceFToN()    == Suspicius2.getDistanceFToN()) {
+        if(CME(Suspicius1.getEyeDepth(), Suspicius2.getEyeDepth())                ||
+           CME(Suspicius1.getDistanceBE(), Suspicius2.getDistanceBE() )           ||
+           CME(Suspicius1.getDistanceNandLip(), Suspicius2.getDistanceNandLip())  ||
+           CME(Suspicius1.getDistanceFToN(), Suspicius2.getDistanceFToN())
+           ) {
             return true;
         }
         return false;
@@ -183,13 +179,13 @@ public:
         B = auxA;
         return;
     }
-
-    void bubblesort(citizen A[], int n) {
-        for (int i = 0; i < n - 1; i++) {
+    
+    void bubblesort() {
+        for (int i = 0; i < suspiciusNum - 1; i++) {
             bool swaped = false;
-            for (int j = 0; j < n - 1 - i; j++) {
-                if (A[j].getEyeDepth() > A[j + 1].getEyeDepth()) {
-                    swap (A[j], A[j + 1]);
+            for (int j = 0; j < suspiciusNum - 1 - i; j++) {
+                if (supiciusList[j].getEyeDepth() > supiciusList[j + 1].getEyeDepth()) {
+                    swap (supiciusList[j], supiciusList[j + 1]);
                     swaped = true;
                 }
             }
@@ -197,7 +193,7 @@ public:
         }
 
     }
-
+    
     void ListedSkinwalkers(citizen AuxSkinWalkers[], int Skins) {
 
         for (int i = li, k = 0, aux = 0; i < auxSkins; i++, k++, aux = 1) {
@@ -216,48 +212,131 @@ public:
         return;
         
     }
-
+    
+    bool checkProfundity(float suspicius1, float suspicius2) {
+        return (suspicius2 > suspicius1);
+    }
+    
 
     // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
-    void SkinWalkersDectector(int Count, int aux, int Skins) {
-        
-        if (Count == suspiciusNum) {
-            SkinWalkerNum++;
-            auxSkins += Skins;
-            suspiciusStatus[Skins - 1] = true;
-            bubblesort(AuxSkinWalkers, Skins);
-            ListedSkinwalkers(AuxSkinWalkers, Skins);
+    void SkinWalkersDectector(int Count, int aux, int Skins, bool flag) {
+        //Se dedica a guardar la solucion en caso de haber encontrado un CambiaForma
+        if (Count == suspiciusNum && Skins > 0) {
+            SkinWalkerNum++; //Al encontrar uno aumenta el numero de CambiaFormas
+            auxSkins += Skins; //Actualiza una variable para la funcion de guardar a los cambiaformas
+            suspiciusStatus[lastsuspicius] = true; //Coloca el ultimo sospechoso confirmado como forma como revisado
+            // En este if desmarca las casillas de los sospechoso que reviso pero que no marco como que son cambiaformas
+            if (suspiciusCountnum > 0) {
+                for (int i = 0; i < suspiciusCountnum; i++) {
+                    int index = suspiciusCount[i];
+                    suspiciusStatus[index] = false;
+                    suspiciusCount[i] = 0;
+                }
+                suspiciusCountnum = 0;
+                flag = false;
+            }
+            OriginalForm=0; //Reseteamos el originalForm para posteriormente comparar nuevas alturas
+            ListedSkinwalkers(AuxSkinWalkers, Skins); //Guardamos el cambia formas
+            return;
+        } 
+
+        //Se dedica a entrar en el caso de no encontrar ningun cambia formas con ese indice y desmarca los 
+        //que se revisaron y el indice que no pudo ser usado
+        if (Count == suspiciusNum && Skins == 0) {
+             if (suspiciusCountnum > 0) {
+                for (int i = 0; i < suspiciusCountnum; i++) {
+                    int index = suspiciusCount[i];
+                    suspiciusStatus[index] = false;
+                    suspiciusCount[i] = 0;
+                }
+                suspiciusCountnum = 0;
+                flag = false;
+            }      
+            for (int i = 0; i < suspiciusNum; i++) {
+                if (suspiciusStatus[i] == false) {
+                    suspiciusStatus[i] = true;
+                    break;
+                } 
+            }
+            OriginalForm=0;
             return;
         }
 
+
         for (int i = 0; i < suspiciusNum; i++) {
-              
-            if (!suspiciusStatus[i]) {
+            //Nos aseguramos que el i nunca sea mayor que el Count
+            if (Count < i) {
+                return;
+            }
+            //Nos aseguramos que no se salga de los limites y que no este usado nuestro Count
+            if (suspiciusStatus[Count] && Count < (suspiciusNum - 1)) {
+                Count++;
+            }
+
+            if (!suspiciusStatus[i] && Count > i) {
                 
-                if (HeightAnalysis(supiciusList[i].getHeigth(),supiciusList[Count].getHeigth()) &&
-                FaceAnalysis(supiciusList[i], supiciusList[Count])) {
+                if (aux == 0) {
+                   OriginalForm=i;
+                }
+
+                if (HeightAnalysis(supiciusList[OriginalForm].getHeigth(),supiciusList[Count].getHeigth()) &&
+                    FaceAnalysis(supiciusList[i], supiciusList[Count])                          && 
+                    checkProfundity(supiciusList[i].getEyeDepth(), supiciusList[Count].getEyeDepth())
+                    ) {
                     
                     if (aux == 0) {
                         AuxSkinWalkers[Skins++] = supiciusList[i];
                         AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
+                        lastsuspicius = Count;
+                        OriginalForm=i;
                         aux = 1;
 
                     } else {
                         AuxSkinWalkers[Skins++] = supiciusList[Count];
                         suspiciusStatus[i] = true;
+                        lastsuspicius = Count;
                     }
-                    
-                    SkinWalkersDectector(Count + 1, aux, Skins);
-                    Count = Skins + 1;
+                    SkinWalkersDectector(Count + 1, aux, Skins, flag);
+                    //El for se encarga de encontrar el nuevo count, el cual siempre sera el segundo
+                    //false en el arreglo del estatus de sospechosos
+                    int aux2 = 0;
+                    for (int j = 0; j < suspiciusNum; j++) {
+                        if (suspiciusStatus[j] == false) {
+                            aux2++;
+                            if (aux2 == 2) {
+                                Count = j;
+                                break;
+                            }
+                        }
+                    }
                     aux = 0;
                     Skins = 0;
 
                 
                 } else {
-                    
-                    SkinWalkersDectector(Count + 1, aux, Skins);
-                    Count = Skins + 1;
+                    //Lo que hacemos aqui es que en el caso de no encontrar una forma con ese indice
+                    //lo marcamos como usado para no repetirlo en las demas iteraciones como un indice valido
+                    if (flag == false) {
+                        suspiciusCount[suspiciusCountnum++] = Count;
+                        suspiciusStatus[Count] = true;
+                    } else {
+                        suspiciusCount[suspiciusCountnum++] = Count;
+                        suspiciusStatus[Count] = true;
+                    }
+                    SkinWalkersDectector(Count + 1, aux, Skins, true);
+                    //El for se encarga de encontrar el nuevo count, el cual siempre sera el segundo
+                    //false en el arreglo del estatus de sospechosos
+                    int aux2 = 0;
+                    for (int j = 0; j < suspiciusNum; j++) {
+                        if (suspiciusStatus[j] == false) {
+                            aux2++;
+                            if (aux2 == 2) {
+                                Count = j;
+                                break;
+                            }
+                        }
+                    }
                     aux = 0;
                     Skins = 0;
 
@@ -463,11 +542,15 @@ int main (){
 
     cout << "Ciudadanos Activos." << endl;
 
+    city.printCitizens();
+
     city.matchArcaneTrail(1,0);
+
+    city.bubblesort();
 
     city.printSuspicius();
 
-    city.SkinWalkersDectector(1, 0, 0);
+    city.SkinWalkersDectector(1, 0, 0, false);
 
     city.printSkinWalkers();
 
