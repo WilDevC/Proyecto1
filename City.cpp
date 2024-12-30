@@ -273,7 +273,7 @@ public:
                 Count++;
             }
 
-            if (!suspiciusStatus[i] && Count > i) {
+            if (!suspiciusStatus[i] && Count > i && !suspiciusStatus[Count]) {
                 
                 if (aux == 0) {
                    OriginalForm=i;
@@ -492,7 +492,7 @@ public:
                     }
     void readBD(){
 
-    ifstream dataBase ("dataBase2.in");
+    ifstream dataBase ("dataBase6.in");
 
     if (!dataBase.is_open()){
         cout << "No se pudo abrir el archivo." << endl;
