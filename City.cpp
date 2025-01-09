@@ -1,13 +1,9 @@
 #include <iostream>
-#include <string>
 #include <fstream>
 using namespace std;
 #define N_MAX 1000
 
-
-
 int N=0, citizensN=0; 
-
 
 class citizen
 {
@@ -21,7 +17,7 @@ protected:
     float distanceFtoN;
     float distanceNandLip;
 public:
-    citizen(): name(" "), race(" "), heigth(0.0),magicalAbility(" "), eyeDepth(0.0),
+    citizen(): name (""), race(" "), heigth(0.0),magicalAbility(" "), eyeDepth(0.0),
                  distanceBE(0.0), distanceFtoN(0.0), distanceNandLip(0.0){};
 
     citizen(string name, string race, float heigth, string magicalAbility, float eyeDepth, float distanceBE,
@@ -110,7 +106,6 @@ public:
 };
 
 
-
 class city : protected citizen
 {
 private:
@@ -144,7 +139,9 @@ public:
     // Verificamos si la altura de la siguiente forma aumenta o disminuye 1 unidad de medida o no.
 
     bool HeightAnalysis (float interval, float height) {
-        return (height >= (interval-1.05) && height <= (interval+1.05));
+        float intervalSum = interval + 1.05;
+        float intervalRest = interval - 1.05;
+        return (height >= intervalRest && height <= intervalSum);
     }
 
     //SECCION DE VERIFICACION DE CAMBIOS DE ESTRUCTURA FACIAL DE LOS SOSPECHOSOS
@@ -173,6 +170,7 @@ public:
         return false;
     }
     
+    //El swap que usa el ordenamiento del arreglo de sospechosos
     void swap(citizen &A, citizen &B) {
         citizen auxA = A;
         A = B;
@@ -180,6 +178,7 @@ public:
         return;
     }
     
+    //Un ordenamiento para el arreglo de sospechosos
     void bubblesort() {
         for (int i = 0; i < suspiciusNum - 1; i++) {
             bool swaped = false;
@@ -192,8 +191,9 @@ public:
             if (!swaped) return;
         }
 
-    }
+    }   
     
+    //Listando los cambiaformas para posteriormente imprimirlos
     void ListedSkinwalkers(citizen AuxSkinWalkers[], int Skins) {
 
         for (int i = li, k = 0, aux = 0; i < auxSkins; i++, k++, aux = 1) {
@@ -213,16 +213,15 @@ public:
         
     }
     
+    //Chequeo de que la profundidad no sea igual
     bool checkProfundity(float suspicius1, float suspicius2) {
         return (suspicius2 > suspicius1);
     }
     
-
-    // DETECTOR DE SKIN WALKERS, EN PRUEBAS, CASI LISTO
+    //SECCION DE DETECCION DE CAMBIAFORMAS
     void SkinWalkersDectector(int Count, int aux, int Skins, bool flag) {
         //Se dedica a guardar la solucion en caso de haber encontrado un CambiaForma
-        if (Count == suspiciusNum && Skins > 0) {
-            SkinWalkerNum++; //Al encontrar uno aumenta el numero de CambiaFormas
+        if (Count == suspiciusNum) {
             auxSkins += Skins; //Actualiza una variable para la funcion de guardar a los cambiaformas
             suspiciusStatus[lastsuspicius] = true; //Coloca el ultimo sospechoso confirmado como forma como revisado
             // En este if desmarca las casillas de los sospechoso que reviso pero que no marco como que son cambiaformas
@@ -235,33 +234,22 @@ public:
                 suspiciusCountnum = 0;
                 flag = false;
             }
+            // En el caso donde con ese indice no encuentre ninguno, lo marca como ya revisado
+            if (Skins == 0) {
+                for (int i = 0; i < suspiciusNum; i++) {
+                    if (suspiciusStatus[i] == false) {
+                        suspiciusStatus[i] = true;
+                        break;
+                    } 
+                }
+                OriginalForm=0;
+                return;
+            }
+            SkinWalkerNum++; //Al encontrar uno aumenta el numero de CambiaFormas
             OriginalForm=0; //Reseteamos el originalForm para posteriormente comparar nuevas alturas
             ListedSkinwalkers(AuxSkinWalkers, Skins); //Guardamos el cambia formas
             return;
         } 
-
-        //Se dedica a entrar en el caso de no encontrar ningun cambia formas con ese indice y desmarca los 
-        //que se revisaron y el indice que no pudo ser usado
-        if (Count == suspiciusNum && Skins == 0) {
-             if (suspiciusCountnum > 0) {
-                for (int i = 0; i < suspiciusCountnum; i++) {
-                    int index = suspiciusCount[i];
-                    suspiciusStatus[index] = false;
-                    suspiciusCount[i] = 0;
-                }
-                suspiciusCountnum = 0;
-                flag = false;
-            }      
-            for (int i = 0; i < suspiciusNum; i++) {
-                if (suspiciusStatus[i] == false) {
-                    suspiciusStatus[i] = true;
-                    break;
-                } 
-            }
-            OriginalForm=0;
-            return;
-        }
-
 
         for (int i = 0; i < suspiciusNum; i++) {
             //Nos aseguramos que el i nunca sea mayor que el Count
@@ -282,8 +270,8 @@ public:
                 if (HeightAnalysis(supiciusList[OriginalForm].getHeigth(),supiciusList[Count].getHeigth()) &&
                     FaceAnalysis(supiciusList[i], supiciusList[Count])                          && 
                     checkProfundity(supiciusList[i].getEyeDepth(), supiciusList[Count].getEyeDepth())
-                    ) {
-                    
+                    ) 
+                    {
                     if (aux == 0) {
                         AuxSkinWalkers[Skins++] = supiciusList[i];
                         AuxSkinWalkers[Skins++] = supiciusList[Count];
@@ -344,13 +332,14 @@ public:
 
             }
 
+            //Caso particular donde se bloquea el iterador y el contador
             if (i == (suspiciusNum-1) && Count == (suspiciusNum-1) && suspiciusStatus[Count]) {
                 int kaux=0;
                 for (int k = 0; k < suspiciusNum; k++) {
                     if (suspiciusStatus[k] == false) {
                         kaux++; 
                     }
-                    }
+                }
                 if (kaux == 1) {
                     SkinWalkersDectector(Count + 1, aux, Skins, flag);
                     return;
@@ -390,7 +379,6 @@ public:
     //SECCION DE LA BUSQUEDA DE LOS GRUPOS A ESTUDIAR
     void matchArcaneTrail(int li, int depth){
         if (depth == 3){
-            cout << "A:" << aux[0].getName() << " B " << aux[1].getName() << " C " << aux[2].getName() << endl;
 
             if (compareArcaneTrail()){
                 if (!isInSuspiciusList(aux[0])){
@@ -413,53 +401,6 @@ public:
                 matchArcaneTrail(i+1,depth+1);
             }
         }
-    }
-
-
-    void printSuspicius(){
-        cout << "Sospechosos " << suspiciusNum << endl;
-        for (int i = 0; i < suspiciusNum; i++){
-            cout << supiciusList[i].getName() << endl;
-            cout << supiciusList[i].getRace() << endl;
-            cout << supiciusList[i].getHeigth() << endl;
-            cout << supiciusList[i].getMagicalAbility() << endl;
-            cout << supiciusList[i].getEyeDepth() << endl;
-            cout << supiciusList[i].getDistanceBE() << endl;
-            cout << supiciusList[i].getDistanceFToN() << endl;
-            cout << supiciusList[i].getDistanceNandLip() << endl;
-        } 
-    }
-
-    void printSkinWalkers() {
-        cout << SkinWalkerNum << endl;
-        for (int i = 0; i < li; i++) {
-            cout << SkinWalkerListed[i] << " - " << ListedSkinWalkers[i] << endl;
-        }
-    }
-
-    void printCitizens(){
-        for (int i = 1; i <= citizensN; i++){
-            cout << citizens[i].getName() << endl;
-            cout << citizens[i].getRace() << endl;
-            cout << citizens[i].getHeigth() << endl;
-            cout << citizens[i].getMagicalAbility() << endl;
-            cout << citizens[i].getEyeDepth() << endl;
-            cout << citizens[i].getDistanceBE() << endl;
-            cout << citizens[i].getDistanceFToN() << endl;
-            cout << citizens[i].getDistanceNandLip() << endl;
-        }
-    }
-    void printCityzen(int n){
-
-        cout << citizens[n].getName() << endl;
-        cout << citizens[n].getRace() << endl;
-        cout << citizens[n].getHeigth() << endl;
-        cout << citizens[n].getMagicalAbility() << endl;
-        cout << citizens[n].getEyeDepth() << endl;
-        cout << citizens[n].getDistanceBE() << endl;
-        cout << citizens[n].getDistanceFToN() << endl;
-        cout << citizens[n].getDistanceNandLip() << endl;
-
     }
 
     //Añade un ciudadano a la lista asegurandose que cumpla con los valores adecuados.
@@ -502,13 +443,13 @@ public:
                         }else {
                             return flag;
                         }   
-                    }
+                   }
+
     void readBD(){
 
-    ifstream dataBase ("dataBase10.in");
+    ifstream dataBase ("dataBase.in");
 
     if (!dataBase.is_open()){
-        cout << "No se pudo abrir el archivo." << endl;
         return;
     }
 
@@ -516,7 +457,6 @@ public:
     dataBase.ignore();
 
     if (N < 1 || N > 1000){
-        cout << "Valor introducido Erroneo." << endl;
         return;
     }
 
@@ -544,8 +484,58 @@ public:
     
     dataBase.close();
     }
-};
 
+
+    void printSkinWalkers() {
+        cout << SkinWalkerNum << endl;
+        for (int i = 0; i < li; i++) {
+            cout << SkinWalkerListed[i] << " - " << ListedSkinWalkers[i] << endl;
+        }
+    }
+
+    /*
+    void printSuspicius(){
+        cout << "Sospechosos " << suspiciusNum << endl;
+        for (int i = 0; i < suspiciusNum; i++){
+            cout << supiciusList[i].getName() << endl;
+            cout << supiciusList[i].getRace() << endl;
+            cout << supiciusList[i].getHeigth() << endl;
+            cout << supiciusList[i].getMagicalAbility() << endl;
+            cout << supiciusList[i].getEyeDepth() << endl;
+            cout << supiciusList[i].getDistanceBE() << endl;
+            cout << supiciusList[i].getDistanceFToN() << endl;
+            cout << supiciusList[i].getDistanceNandLip() << endl;
+        } 
+    }
+
+    void printCitizens(){
+        for (int i = 1; i <= citizensN; i++){
+            cout << citizens[i].getName() << endl;
+            cout << citizens[i].getRace() << endl;
+            cout << citizens[i].getHeigth() << endl;
+            cout << citizens[i].getMagicalAbility() << endl;
+            cout << citizens[i].getEyeDepth() << endl;
+            cout << citizens[i].getDistanceBE() << endl;
+            cout << citizens[i].getDistanceFToN() << endl;
+            cout << citizens[i].getDistanceNandLip() << endl;
+        }
+    }
+    void printCityzen(int n){
+
+        cout << citizens[n].getName() << endl;
+        cout << citizens[n].getRace() << endl;
+        cout << citizens[n].getHeigth() << endl;
+        cout << citizens[n].getMagicalAbility() << endl;
+        cout << citizens[n].getEyeDepth() << endl;
+        cout << citizens[n].getDistanceBE() << endl;
+        cout << citizens[n].getDistanceFToN() << endl;
+        cout << citizens[n].getDistanceNandLip() << endl;
+
+    }
+    */
+
+     
+};
 
 
 int main (){
@@ -553,15 +543,9 @@ int main (){
 
     city.readBD();
 
-    cout << "Ciudadanos Activos." << endl;
-
-    city.printCitizens();
-
     city.matchArcaneTrail(1,0);
 
     city.bubblesort();
-
-    city.printSuspicius();
 
     city.SkinWalkersDectector(1, 0, 0, false);
 
