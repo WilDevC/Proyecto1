@@ -222,8 +222,6 @@ public:
     void SkinWalkersDectector(int Count, int aux, int Skins, bool flag) {
         //Se dedica a guardar la solucion en caso de haber encontrado un CambiaForma
         if (Count == suspiciusNum) {
-            auxSkins += Skins; //Actualiza una variable para la funcion de guardar a los cambiaformas
-            suspiciusStatus[lastsuspicius] = true; //Coloca el ultimo sospechoso confirmado como forma como revisado
             // En este if desmarca las casillas de los sospechoso que reviso pero que no marco como que son cambiaformas
             if (suspiciusCountnum > 0) {
                 for (int i = 0; i < suspiciusCountnum; i++) {
@@ -245,6 +243,8 @@ public:
                 OriginalForm=0;
                 return;
             }
+            auxSkins += Skins; //Actualiza una variable para la funcion de guardar a los cambiaformas
+            suspiciusStatus[lastsuspicius] = true; //Coloca el ultimo sospechoso confirmado como forma como revisado
             SkinWalkerNum++; //Al encontrar uno aumenta el numero de CambiaFormas
             OriginalForm=0; //Reseteamos el originalForm para posteriormente comparar nuevas alturas
             ListedSkinwalkers(AuxSkinWalkers, Skins); //Guardamos el cambia formas
